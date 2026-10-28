@@ -1,0 +1,38 @@
+{
+	"name": "Swarm - Prepare a support brief",
+	"active": false,
+	"nodes": [
+		{
+			"id": "start",
+			"name": "When executed manually",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [0, 0],
+			"parameters": {}
+		},
+		{
+			"id": "context",
+			"name": "Find relevant Swarm context",
+			"type": "@blackscaletech/n8n-nodes-swarm.swarm",
+			"typeVersion": 1,
+			"position": [240, 0],
+			"parameters": {
+				"resource": "space",
+				"operation": "buildSpaceContextPack",
+				"spaceId": { "mode": "id", "value": "sp_replace_with_your_space" },
+				"tokenBudget": 2000,
+				"additionalFields": {
+					"query": "What was agreed for the customer's rollout and which questions are still open?",
+					"mode": "extractive"
+				}
+			}
+		}
+	],
+	"connections": {
+		"When executed manually": {
+			"main": [[{ "node": "Find relevant Swarm context", "type": "main", "index": 0 }]]
+		}
+	},
+	"settings": { "executionOrder": "v1" },
+	"pinData": {}
+}

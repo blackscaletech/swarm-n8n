@@ -1,0 +1,87 @@
+{
+	"name": "Swarm - Save a support report",
+	"active": false,
+	"nodes": [
+		{
+			"id": "start",
+			"name": "When executed manually",
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [0, 0],
+			"parameters": {}
+		},
+		{
+			"id": "inputs",
+			"name": "Report inputs",
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [240, 0],
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "space",
+							"name": "spaceId",
+							"type": "string",
+							"value": "sp_replace_with_your_space"
+						},
+						{
+							"id": "event",
+							"name": "eventId",
+							"type": "string",
+							"value": "support-case:123:summary:v1"
+						},
+						{
+							"id": "report",
+							"name": "report",
+							"type": "string",
+							"value": "The customer confirmed the Friday rollout. Support will send the checklist on Thursday."
+						}
+					]
+				},
+				"options": {}
+			}
+		},
+		{
+			"id": "artifact",
+			"name": "Save report",
+			"type": "@blackscaletech/n8n-nodes-swarm.swarm",
+			"typeVersion": 1,
+			"position": [480, 0],
+			"parameters": {
+				"resource": "artifact",
+				"operation": "createArtifact",
+				"spaceId": { "mode": "id", "value": "={{ $json.spaceId }}" },
+				"kind": "support_report",
+				"mediaType": "text/markdown",
+				"body": "={{ $json.report }}",
+				"requestKey": "={{ $json.eventId + ':artifact' }}",
+				"additionalFields": {}
+			}
+		},
+		{
+			"id": "message",
+			"name": "Notify the Space",
+			"type": "@blackscaletech/n8n-nodes-swarm.swarm",
+			"typeVersion": 1,
+			"position": [720, 0],
+			"parameters": {
+				"resource": "conversation",
+				"operation": "createConversationEntry",
+				"spaceId": { "mode": "id", "value": "={{ $('Report inputs').item.json.spaceId }}" },
+				"bodyText": "={{ 'Support report saved as Artifact ' + $json.id + '.' }}",
+				"requestKey": "={{ $('Report inputs').item.json.eventId + ':message' }}",
+				"additionalFields": {}
+			}
+		}
+	],
+	"connections": {
+		"When executed manually": {
+			"main": [[{ "node": "Report inputs", "type": "main", "index": 0 }]]
+		},
+		"Report inputs": { "main": [[{ "node": "Save report", "type": "main", "index": 0 }]] },
+		"Save report": { "main": [[{ "node": "Notify the Space", "type": "main", "index": 0 }]] }
+	},
+	"settings": { "executionOrder": "v1" },
+	"pinData": {}
+}
