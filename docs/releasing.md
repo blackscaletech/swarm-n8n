@@ -28,10 +28,13 @@ service, SDKs and MCP packages. Only reviewed public client files belong here.
    `npm` environment. For a new package, npm's authenticated `stage publish` can
    establish ownership without giving a CI runner a reusable token. npm creates
    its public `0.0.0-stage` placeholder; the staged node remains unpublished.
-   Configure trusted publishing, reject the local bootstrap stage without
-   approving it, then publish the actual release only from the approved GitHub
-   workflow with provenance. Do not publish the node locally or create broad
-   long-lived tokens. See [npm's staging documentation](https://docs.npmjs.com/staged-publishing/).
+   Keep that bootstrap stage pending until the first real release succeeds;
+   rejecting the only stage of a new package can remove its placeholder and
+   publisher configuration. Configure trusted publishing and publish a different
+   release version only from the approved GitHub workflow with provenance.
+   After verifying that release, reject the disposable bootstrap stage without
+   approving it. Do not publish the node locally or create broad long-lived
+   tokens. See [npm's staging documentation](https://docs.npmjs.com/staged-publishing/).
 6. Only after explicit runner and release approval, manually dispatch
    **Review Or Publish** on that version tag, with the exact version and
    `publish=true`. It requalifies before publishing the verified tarball with npm
