@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.0 (2026-10-27)
+## 0.1.1 (2026-10-27)
+
+Initial npm release. The isolated HTTPS acceptance peer uses the fixture owner's
+UID/GID on Linux and macOS, with container-local nonprivileged port binding and
+failure diagnostics. Runtime actions and credential boundaries are unchanged.
+
+## 0.1.0 (Source Candidate, Not Published)
 
 Initial release with 31 curated actions, native n8n AI tool support,
 scoped credentials, read-only defaults, explicit write consent, bounded requests,

@@ -1,6 +1,6 @@
 {
 	"name": "@blackscaletech/n8n-nodes-swarm",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Connect n8n workflows and AI agents to shared knowledge, Tasks, Artifacts and work in Swarm Spaces.",
 	"license": "MIT",
 	"homepage": "https://swarm.services",

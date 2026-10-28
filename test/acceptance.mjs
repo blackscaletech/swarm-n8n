@@ -234,6 +234,10 @@ try {
 		'-d',
 		'--name',
 		peer,
+		'--user',
+		`${process.getuid()}:${process.getgid()}`,
+		'--sysctl',
+		'net.ipv4.ip_unprivileged_port_start=0',
 		'--label',
 		`com.blackscale.swarm-n8n.fixture=${network}`,
 		'--network',
@@ -580,6 +584,14 @@ try {
 	failure = error;
 } finally {
 	if (networkCreated) {
+		if (failure)
+			try {
+				const log = run('docker', ['logs', '--tail', '50', peer]);
+				save('peer.log', log);
+				console.error('Synthetic HTTPS fixture:\n' + log);
+			} catch {
+				// A daemon failure can also prevent diagnostics; cleanup must still run.
+			}
 		try {
 			const remaining = run('docker', [
 				'ps',

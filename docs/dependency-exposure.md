@@ -1,6 +1,6 @@
 # Dependency Exposure Review
 
-Reviewed October 27, 2026 for version 0.1.0 and the pinned
+Reviewed October 27, 2026 for versions 0.1.0 and 0.1.1 and the pinned
 n8n 2.45.4 acceptance host. This is not a security certification of n8n itself.
 
 ## What Ships
