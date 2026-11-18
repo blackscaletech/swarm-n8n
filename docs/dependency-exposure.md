@@ -1,7 +1,9 @@
 # Dependency Exposure Review
 
-Reviewed October 27, 2026 for versions 0.1.0 and 0.1.1 and the pinned
-n8n 2.45.4 acceptance host. This is not a security certification of n8n itself.
+Updated November 18, 2026 for version 0.2.0 and the pinned n8n 2.48.5
+acceptance host, following the October review. This is not a security
+certification of n8n itself. Official CLI/scanner releases and the matching
+workflow peer are updated without dependency overrides or scanner suppressions.
 
 ## What Ships
 
@@ -29,16 +31,19 @@ count of confirmed vulnerabilities in the Swarm node.
 
 | Flagged root        | Audited copy and relevance                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `deepmerge` 4.3.1   | Pulled by CLI browser/AI tooling. Not bundled, installed or imported by the Swarm node. Other host nodes may have independent copies.                                                                                                                                                                                                                                                                                                                        |
+| `glob` 11.1.0 | Official CLI cleanup dependency. Its abort behavior remains unpatched upstream in this dependency range. It is used only on the reviewed local source tree during development/release, never by the node or with workflow input. The release workflow also has a job timeout. |
+| `minimatch` 10.2.6 | Official CLI/linting dependency. The advisory requires an attacker-controlled glob pattern; workflow data never reaches this tooling. Release tooling runs only against reviewed source and repository-controlled patterns, not arbitrary submitted projects. Not bundled or imported by the node. |
 | `tmp` 0.2.4         | Official scanner dependency. Its observed temporary-directory call uses static options, without untrusted prefix/postfix/directory input. Still an unpatched tooling finding.                                                                                                                                                                                                                                                                                |
 | `uuid` 10.0.0       | CLI/LangChain dependency, not added by this node. The qualified host's workflow peer uses 11.1.1. Swarm does not call UUID buffer APIs.                                                                                                                                                                                                                                                                                                                      |
-| `qs` 6.15.2         | Present in tooling and the qualified host HTTP helper. Swarm constructs scalar-only query parameters, does not parse query strings or expose serializer options; the host uses indexed serialization. The reported parsing/comma-array inputs are not produced by these actions. Other host uses are not cleared.                                                                                                                                            |
+| `qs` 6.16.0 | Present in tooling and the qualified host HTTP helper. Two earlier advisories no longer apply to this copy; the remaining comma-array serializer advisory is retained. Swarm constructs scalar-only query parameters and exposes no serializer options. Other host uses are not cleared. |
 | `stream-json` 1.9.1 | Present in tooling and host execution-data parsing. Swarm's HTTP JSON path uses Axios, not stream-json. Host persistence/readback remains a host-level concern; absence from our tarball does not prove the host unaffected.                                                                                                                                                                                                                                 |
 | `zod` 3.25.76       | Present in tooling and host validation. Native schema checks cover all 31 Swarm actions and 102 arguments: scalars and custom JSON validators, with no per-element array validators. Scalars reject an array with one issue; the JSON validator does not validate each element. Swarm then enforces its collection limits before mapping. This excludes the reported array-error amplification path for those tool arguments, not every n8n validation path. |
 
 Relevant primary sources: [n8n verification requirements](https://docs.n8n.io/connect/create-nodes/build-your-node/reference/verification-guidelines.md),
 [Zod advisory](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5),
 [tmp advisory](https://github.com/advisories/GHSA-ph9p-34f9-6g65).
+The refreshed review also covers the [glob abort advisory](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4)
+and [minimatch pattern advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249).
 Exact advisory IDs, versions, paths and severities are retained in the unfiltered
 local npm audit report. Counts can change with the advisory feed.
 
@@ -50,7 +55,7 @@ source/package checks and provenance requirements remain mandatory and unchanged
 No vulnerable package was renamed, overridden, forked or hidden from the audit.
 
 The owner-approved `npm run review:dependencies` gate retains the unfiltered
-audit and visibly reports the reviewed findings. Its six root-package reviews
+audit and visibly reports the reviewed findings. Its seven root-package reviews
 are bound to exact versions, installation paths, advisory IDs and severities,
 the qualified toolchain and the no-added-runtime-dependencies boundary. New or
 changed findings, incomplete reports and an expired review block release.

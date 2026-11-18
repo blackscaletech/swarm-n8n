@@ -14,7 +14,7 @@ assert.match(pkg.version, /^\d+\.\d+\.\d+$/);
 const exportPath = `${root}/blackscaletech-n8n-nodes-swarm-${pkg.version}.tgz`;
 for (const path of [exportPath, `${exportPath}.sha256`]) rmSync(path, { force: true });
 const image =
-	'docker.n8n.io/n8nio/n8n@sha256:80e23ced901f0e22597d4f3464e3aaf9d835372262ea6f08ef760d8ca35df25c';
+	'docker.n8n.io/n8nio/n8n@sha256:c0ea1246a81a34ce8e2b3cfb1f718b97de64b0a1b3747ad24d6d431826bb71ad';
 mkdirSync(`${root}/.local`, { recursive: true });
 const dir = mkdtempSync(`${root}/.local/acceptance-`);
 const network = `swarm-n8n-${process.pid}`,
@@ -124,11 +124,11 @@ try {
 		'NODE_EXTRA_CA_CERTS=/fixture/server.crt',
 	];
 	const n8n = (...args) => run('docker', ['run', ...common, image, ...args]);
-	const node = (name, parameters, credential = 'swarmSynthetic01', tool = false) => ({
+	const node = (name, parameters, credential = 'swarmSynthetic01', tool = false, version = 1) => ({
 		id: name,
 		name,
 		type: `@blackscaletech/n8n-nodes-swarm.swarm${tool ? 'Tool' : ''}`,
-		typeVersion: 1,
+		typeVersion: version,
 		position: [240, 0],
 		parameters,
 		credentials: { swarmApi: { id: credential, name: 'Synthetic connection' } },
@@ -284,6 +284,32 @@ try {
 			`${op.id} produced no native output`,
 		);
 	const listOp = operations.find((op) => op.id === 'listSpaces');
+	const automatic = execute(
+		workflow('swarmLocalAutomaticPages02', [
+			node(
+				'Return All',
+				{ resource: 'space', operation: 'listSpaces', returnAll: true },
+				'swarmSynthetic02',
+				false,
+				2,
+			),
+			node(
+				'Limit Results',
+				{ resource: 'space', operation: 'listSpaces', returnAll: false, limit: 2 },
+				'swarmSynthetic02',
+				false,
+				2,
+			),
+		]),
+	);
+	assert(!automatic.data.resultData.error, JSON.stringify(automatic.data.resultData.error));
+	assert.equal(automatic.data.resultData.runData['Return All'][0].data.main[0].length, 1);
+	assert.equal(automatic.data.resultData.runData['Limit Results'][0].data.main[0].length, 2);
+	assert(
+		automatic.data.resultData.runData['Limit Results'][0].data.main[0].every(
+			(item) => !('nextCursor' in item.json),
+		),
+	);
 	const paging = execute(
 		workflow('swarmLocalPages01', [
 			node('First page', { ...parameters(listOp), limit: 1, additionalFields: {} }),

@@ -124,6 +124,8 @@ https
 				status: 'succeeded',
 			};
 			if (op.page) {
+				if (url.searchParams.get('limit') === '100' && !url.searchParams.has('cursor'))
+					return reply(200, [], { 'X-Next-Cursor': 'synthetic-next-page' });
 				if (url.searchParams.get('cursor') === 'synthetic-empty') return reply(200, []);
 				if (url.searchParams.get('cursor') === 'synthetic-multiple')
 					return reply(200, [

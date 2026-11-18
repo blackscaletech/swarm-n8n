@@ -3,16 +3,11 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-// Owner-approved exposure review. These versions are not claimed to be patched.
+// Scoped development exposure review. These versions are not claimed to be patched.
 const reviewed = {
-	deepmerge: ['4.3.1', 'node_modules/deepmerge', 'low', 'tooling', ['GHSA-gcqx-w48m-w2h4']],
-	qs: [
-		'6.15.2',
-		'node_modules/@n8n/backend-network/node_modules/qs',
-		'moderate',
-		'tooling-and-host',
-		['GHSA-x5fp-wj9c-mxmx', 'GHSA-4mjr-xmp4-gh2g', 'GHSA-6pq8-jhm2-2vcw'],
-	],
+	glob: ['11.1.0', 'node_modules/glob', 'moderate', 'tooling', ['GHSA-3g3m-2fjr-6pw4']],
+	minimatch: ['10.2.6', 'node_modules/minimatch', 'moderate', 'tooling', ['GHSA-g3hv-75wg-m249']],
+	qs: ['6.16.0', 'node_modules/qs', 'moderate', 'tooling-and-host', ['GHSA-6pq8-jhm2-2vcw']],
 	'stream-json': [
 		'1.9.1',
 		'node_modules/stream-json',
@@ -31,9 +26,9 @@ const reviewed = {
 	zod: ['3.25.76', 'node_modules/zod', 'high', 'tooling-and-host', ['GHSA-mrhx-c7xc-m3w5']],
 };
 const reviewedTools = {
-	'@n8n/node-cli': '0.54.3',
-	'@n8n/scan-community-package': '0.41.0',
-	'n8n-workflow': '2.45.1',
+	'@n8n/node-cli': '0.57.4',
+	'@n8n/scan-community-package': '0.44.0',
+	'n8n-workflow': '2.48.3',
 };
 const reviewUntil = '2026-11-27T23:59:59Z';
 

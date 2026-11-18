@@ -16,7 +16,7 @@ export class Swarm implements INodeType {
 		name: 'swarm',
 		icon: { light: 'file:swarm.svg', dark: 'file:swarm.svg' },
 		group: ['transform'],
-		version: 1,
+		version: [1, 2],
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Use shared knowledge, context and work in Swarm Spaces',
 		defaults: {

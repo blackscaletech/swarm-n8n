@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0 (2026-11-18)
+
+New nodes use version 2 with Return All and a conditional total Limit. Pagination
+follows opaque cursors internally, one request at a time, including empty pages.
+Repeated cursors, cancellation, a five-minute deadline, 64 MiB and 1000-page
+safety bounds fail explicitly instead of silently truncating Return All.
+Saved version 1 workflows retain their original single-page output and cursors.
+Operation descriptions replace the context-pack and evaluation notice banners.
+
+The 31 API actions and credential permissions are unchanged. Official development
+tooling and the isolated acceptance host are updated. Upstream findings remain
+documented under the existing scoped exposure gate; no dependency overrides,
+scanner suppressions or added runtime modules are used.
+
 ## 0.1.1 (2026-10-27)
 
 Initial npm release. The isolated HTTPS acceptance peer uses the fixture owner's

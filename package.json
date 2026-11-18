@@ -1,6 +1,6 @@
 {
 	"name": "@blackscaletech/n8n-nodes-swarm",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "Connect n8n workflows and AI agents to shared knowledge, Tasks, Artifacts and work in Swarm Spaces.",
 	"license": "MIT",
 	"homepage": "https://swarm.services",
@@ -44,10 +44,10 @@
 		]
 	},
 	"devDependencies": {
-		"@n8n/node-cli": "0.54.3",
-		"@n8n/scan-community-package": "0.41.0",
-		"eslint": "10.13.0",
-		"n8n-workflow": "2.45.1",
+		"@n8n/node-cli": "0.57.4",
+		"@n8n/scan-community-package": "0.44.0",
+		"eslint": "10.15.0",
+		"n8n-workflow": "2.48.3",
 		"prettier": "3.8.3",
 		"typescript": "6.0.2"
 	},

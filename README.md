@@ -69,11 +69,15 @@ a background session, claim Runs or act as a Run executor.
 
 - Requests go only to `https://api.swarm.services`, with TLS verification and
   redirects disabled. There is no custom host, URL or arbitrary HTTP operation.
-- Page size is 1 to 100, default 50. **Records** emits each result as an n8n item.
-  **Page With Cursor** emits `{ items, nextCursor, hasMore }`. Pass `nextCursor`
-  into the next request explicitly. This node adds no automatic pagination or
-  application retry loop. Native n8n may retry a `401` authentication failure once.
-- Each incoming n8n item makes one request. n8n can execute these concurrently;
+- New nodes use version 2. Lists offer **Return All** or a total **Limit**,
+  default 50. Cursors are followed internally, one request at a time, in pages
+  of at most 100 records. Results are individual n8n items. Return All fails
+  explicitly beyond 1000 pages, 64 MiB or five minutes, rather than silently
+  truncating. Use a Limit or narrower filters for larger workloads. Saved
+  version 1 workflows keep their original cursor and page-output behavior.
+- Each incoming n8n item makes one request or a sequential pagination loop.
+  Native n8n may retry a `401` authentication failure once; no application
+  retry loop is added. n8n can execute different input items concurrently;
   use Loop Over Items and Wait for large batches. This node does not add its own
   scheduler or global concurrency limit. Respect Swarm's rate-limit responses.
 - **Response Fields** defaults to **Raw**. Choose **Simplified** for up to ten
@@ -83,7 +87,7 @@ a background session, claim Runs or act as a Run executor.
   Bind this choice before using the node as an AI agent tool.
 - **Get Selected Tasks** requires a Space and up to 40 known Task IDs. Search
   first if you need to discover Tasks. Dependency lists require one predecessor
-  and support the same explicit limit, cursor and page output as other lists.
+  and support the same Return All and total Limit controls as other lists.
 - Requests time out after 30 seconds and responses are capped at 8 MiB. Artifact
   creation supports text, Markdown and JSON up to 256 KiB. Use the API or SDK
   directly for larger payloads and binary streaming.
@@ -117,8 +121,9 @@ with the original Request Key. Do not put automatic retries around changed input
 ## Development
 
 Use the Node.js version in `.node-version` (24.22.1) and npm 11.19.1 for development.
-n8n 2.45.4 or later is required. The candidate is qualified against n8n 2.45.4
-and its `n8n-workflow` 2.45.1 peer, including HTTP response-byte limits.
+n8n 2.48.5 or later is required for this release. Qualification uses the pinned
+n8n 2.48.5 host and its matching `n8n-workflow` 2.48.3 peer, including HTTP
+response-byte limits. Keep self-hosted n8n security updates current.
 
 ```sh
 npm ci --ignore-scripts

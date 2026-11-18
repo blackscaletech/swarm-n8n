@@ -12,6 +12,7 @@ import { operations } from './catalog';
 import { fieldName, type Operation } from './fields';
 import { fieldValue } from './validation';
 import { outputFields, selectFields } from './output';
+import { rememberPage, resultLimit } from './pagination';
 
 export const origin = 'https://api.swarm.services';
 export const requestBounds = {
@@ -113,6 +114,12 @@ export async function prepareRequest(
 		qs: IDataObject = {};
 	let path = operation.path;
 	for (const field of operation.fields) {
+		if (
+			operation.page &&
+			this.getNode().typeVersion !== 1 &&
+			['limit', 'cursor'].includes(field.wire)
+		)
+			continue;
 		const name = fieldName(field);
 		const raw = field.required
 			? this.getNodeParameter(name, field.initial ?? '', { extractValue: true })
@@ -126,6 +133,8 @@ export async function prepareRequest(
 		else if (field.location === 'query') qs[field.wire] = value;
 		else body[field.wire] = value;
 	}
+	if (operation.fields.some((field) => field.wire === 'cursor') && this.getNode().typeVersion !== 1)
+		qs.limit = Math.min(100, resultLimit.call(this));
 	if (
 		operation.id === 'buildSpaceContextPack' &&
 		![body.query, body.objective].some((value) => typeof value === 'string' && value.trim())
@@ -193,7 +202,7 @@ export async function receiveResponse(
 		return items.map((item) => ({ ...item, json: selectFields(item.json, fields), pairedItem }));
 	const records = responseRecords(response, 100, this.getNode());
 	const nextCursor = responseCursor(response, this.getNode()) ?? null;
-	if (this.getNodeParameter('outputMode', 'records') === 'page')
+	if (this.getNode().typeVersion === 1 && this.getNodeParameter('outputMode', 'records') === 'page')
 		return [
 			{
 				pairedItem,
@@ -204,7 +213,9 @@ export async function receiveResponse(
 				},
 			},
 		];
-	return records.map((record) => ({ json: selectFields(record, fields), pairedItem }));
+	const output = records.map((record) => ({ json: selectFields(record, fields), pairedItem }));
+	rememberPage(output, nextCursor ?? undefined, response.body);
+	return output;
 }
 
 export function responseRecords(

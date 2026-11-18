@@ -6,7 +6,7 @@ export const knowledge: Operation[] = [
 		resource: 'space',
 		id: 'listSpaces',
 		name: 'List',
-		description: 'List one page of authorized Spaces',
+		description: 'List authorized Spaces',
 		method: 'GET',
 		path: '/v1/spaces',
 		page: true,
@@ -40,7 +40,8 @@ export const knowledge: Operation[] = [
 		resource: 'space',
 		id: 'buildSpaceContextPack',
 		name: 'Build Context Pack',
-		description: 'Retrieve bounded context for an agent',
+		description:
+			'Retrieve bounded context for an agent; add a Query or Objective in Additional Fields',
 		method: 'POST',
 		path: '/v1/spaces/{spaceId}/context-pack',
 		fields: [

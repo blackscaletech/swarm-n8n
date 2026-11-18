@@ -4,10 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-	analyzePackage,
-	SOURCE_FILE_PATTERNS,
-} from '@n8n/scan-community-package/scanner/scanner.mjs';
+import { lintDirectory, SOURCE_FILE_PATTERNS } from '@n8n/scan-community-package/dist/scanner.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dir = mkdtempSync(join(tmpdir(), 'swarm-n8n-scan-'));
@@ -23,7 +20,7 @@ try {
 		['source', root, SOURCE_FILE_PATTERNS],
 		['tarball', join(dir, 'package'), ['**/*.js', 'package.json']],
 	]) {
-		const result = await analyzePackage(path, patterns);
+		const result = await lintDirectory(path, patterns);
 		assert(result.passed, `${scope}: ${result.message}\n${result.details ?? ''}`);
 		console.log(`Official n8n scanner ${scope} rules passed`);
 	}

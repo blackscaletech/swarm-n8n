@@ -74,7 +74,8 @@ export const collaboration: Operation[] = [
 		resource: 'evaluation',
 		id: 'createEvaluation',
 		name: 'Create',
-		description: 'Record feedback; existing authorized follow-up policies may react to it',
+		description:
+			'Record feedback with a Run ID or Artifact ID and Outcome and Score, or a Run Scoring Contract Hash and Dimension Scores in Additional Fields; existing authorized follow-up policies may react',
 		method: 'POST',
 		path: '/v1/evaluations',
 		writes: true,

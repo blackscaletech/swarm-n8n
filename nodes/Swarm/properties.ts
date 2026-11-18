@@ -2,6 +2,7 @@ import type { INodeProperties } from 'n8n-workflow';
 import { operations, resources } from './catalog';
 import { fieldName, type Field } from './fields';
 import { prepareRequest, receiveResponse } from './request';
+import { paginate } from './pagination';
 
 function property(field: Field): INodeProperties {
 	const name = fieldName(field),
@@ -97,7 +98,13 @@ export const properties: INodeProperties[] = [
 					action: op.description,
 					routing: {
 						request: { method: op.method, url: op.path },
-						send: { preSend: [prepareRequest] },
+						send: {
+							preSend: [prepareRequest],
+							...(op.fields.some((f) => f.wire === 'cursor') ? { paginate: true } : {}),
+						},
+						...(op.fields.some((f) => f.wire === 'cursor')
+							? { operations: { pagination: paginate } }
+							: {}),
 						output: { postReceive: [receiveResponse] },
 					},
 				})),
@@ -107,30 +114,15 @@ export const properties: INodeProperties[] = [
 	...operations.flatMap((op) => {
 		const displayOptions = { show: { resource: [op.resource], operation: [op.id] } };
 		return [
-			...(op.id === 'buildSpaceContextPack'
-				? [
-						{
-							displayName: 'Add a Query or Objective in Additional Fields.',
-							name: 'contextNotice',
-							type: 'notice',
-							default: '',
-							displayOptions,
-						} as INodeProperties,
-					]
-				: []),
-			...(op.id === 'createEvaluation'
-				? [
-						{
-							displayName:
-								'In Additional Fields, select a Run ID or Artifact ID and add Outcome and Score, or the Run Scoring Contract Hash and Dimension Scores. Existing follow-up policies may react to this feedback.',
-							name: 'evaluationNotice',
-							type: 'notice',
-							default: '',
-							displayOptions,
-						} as INodeProperties,
-					]
-				: []),
-			...op.fields.filter((f) => f.required).map((f) => ({ ...property(f), displayOptions })),
+			...op.fields
+				.filter((f) => f.required)
+				.map((f) => ({
+					...property(f),
+					displayOptions:
+						op.page && f.wire === 'limit'
+							? { show: { ...displayOptions.show, '@version': [1] } }
+							: displayOptions,
+				})),
 			...(op.writes
 				? [
 						{
@@ -153,7 +145,7 @@ export const properties: INodeProperties[] = [
 							name: 'outputMode',
 							type: 'options',
 							default: 'records',
-							displayOptions,
+							displayOptions: { show: { ...displayOptions.show, '@version': [1] } },
 							options: [
 								{ name: 'Records', value: 'records' },
 								{ name: 'Page With Cursor', value: 'page' },
@@ -161,23 +153,49 @@ export const properties: INodeProperties[] = [
 							description:
 								'Return individual records or one page with items and the next cursor. No automatic pagination.',
 						} as INodeProperties,
+						...(op.fields.some((f) => f.wire === 'cursor')
+							? [
+									{
+										displayName: 'Return All',
+										name: 'returnAll',
+										type: 'boolean',
+										default: false,
+										displayOptions: { show: { ...displayOptions.show, '@version': [2] } },
+										description: 'Whether to return all results or only up to a given limit',
+									} as INodeProperties,
+									{
+										displayName: 'Limit',
+										name: 'limit',
+										type: 'number',
+										default: 50,
+										typeOptions: { minValue: 1, maxValue: 10000, numberPrecision: 0 },
+										displayOptions: {
+											show: { ...displayOptions.show, '@version': [2], returnAll: [false] },
+										},
+										description: 'Max number of results to return',
+									} as INodeProperties,
+								]
+							: []),
 					]
 				: []),
 			...(op.fields.some((f) => !f.required)
-				? [
-						{
-							displayName: 'Additional Fields',
-							name: 'additionalFields',
-							type: 'collection',
-							placeholder: 'Add Field',
-							default: {},
-							displayOptions,
-							options: op.fields
-								.filter((f) => !f.required)
-								.map(property)
-								.sort((a, b) => a.displayName.localeCompare(b.displayName)),
-						} as INodeProperties,
-					]
+				? (op.page ? [1, 2] : [0]).map(
+						(version) =>
+							({
+								displayName: 'Additional Fields',
+								name: 'additionalFields',
+								type: 'collection',
+								placeholder: 'Add Field',
+								default: {},
+								displayOptions: version
+									? { show: { ...displayOptions.show, '@version': [version] } }
+									: displayOptions,
+								options: op.fields
+									.filter((f) => !f.required && (version !== 2 || f.wire !== 'cursor'))
+									.map(property)
+									.sort((a, b) => a.displayName.localeCompare(b.displayName)),
+							}) as INodeProperties,
+					)
 				: []),
 		];
 	}),
